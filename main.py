@@ -2,24 +2,24 @@
 
 """
 main.py -- Udacity conference server-side Python App Engine
-    HTTP controller handlers for memcache & task queue access
 
-$Id$
-
-created by wesc on 2014 may 24
+HTTP controller handlers for memcache & task queue access
 
 """
 
-__author__ = 'wesc+api@google.com (Wesley Chun)'
+__author__ = 'wiseleywu@gmail.com (Wiseley Wu)'
 
 import webapp2
+
 from google.appengine.api import app_identity
 from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
+
 from conference import ConferenceApi
-from conference import MEMCACHE_SPEAKER_KEY
+from settings import MEMCACHE_SPEAKER_KEY
 from models import Conference, Session, Speaker
+
 
 class SetAnnouncementHandler(webapp2.RequestHandler):
     def get(self):
@@ -41,26 +41,28 @@ class SendConfirmationEmailHandler(webapp2.RequestHandler):
                 'conferenceInfo')
         )
 
+
 class checkedFeaturedSpeaker(webapp2.RequestHandler):
     def post(self):
         """Check Featured Speaker within a Conference"""
         conf = ndb.Key(urlsafe=self.request.get('wsck')).get()
-        speaker=ndb.Key(Speaker, int(self.request.get('speakerId'))).get()
+        speaker = ndb.Key(Speaker, int(self.request.get('speakerId'))).get()
         sessions = Session.query(ancestor=conf.key)
-        sessions = sessions.filter(Session.speakerId == int(self.request.get('speakerId')))
+        sessions = sessions.filter(
+                Session.speakerId == int(self.request.get('speakerId')))
+        # don't featured speaker if only in 0 or 1 session
         if sessions.count() <= 1:
-            announcement=""
+            announcement = ""
         else:
-            announcement='%s %s %s %s' % (
+            announcement = '%s %s %s %s' % (
                 'Featured Speaker - ',
                 speaker.displayName,
                 '. You can find the speaker in the following sessions: ',
                 ', '.join(
-                session.name for session in sessions)
+                    session.name for session in sessions)
             )
         memcache.set(MEMCACHE_SPEAKER_KEY, announcement)
         self.response.set_status(204)
-
 
 
 app = webapp2.WSGIApplication([
