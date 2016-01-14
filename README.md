@@ -112,7 +112,7 @@ App Engine application for the Udacity training course.
     a list comprehension with if/else statement, where only sessions with
     session type not equal to what the user specified will be passed into the
     final result. In this case, user supplied undesired session type to
-    'sessionType', while 'operator' and 'value' arguments remained the same.
+    `sessionType`, while `operator` and `value` arguments remained the same.
 
 ## Task 4: Add a Task
 - When a new session is added to a conference (via `createSession` endpoint), a
