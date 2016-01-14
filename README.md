@@ -13,8 +13,6 @@ App Engine application for the Udacity training course.
 - `Session` entity is setup to have the following properties:
   - `name` - Name of Session (StringProperty)
   - `sessionType` - Type of Session, such as workshop, lecture, etc (StringProperty)
-  - `organizerUserId` - User ID who created the session, same as the one who created
-    the parent conference (IntegerProperty)
   - `speakerId` - An unique identifier of the speaker who hosts the session
     (IntegerProperty)
   - `highlight` - Summary of the session (StringProperty, not indexed)
@@ -84,14 +82,13 @@ App Engine application for the Udacity training course.
     city in `value`. Another example would be "Conferences by the same host
     you may like" by querying with topics in `field`, EQ in `operator`, and
     the current conference topics in `value`
-  - `querySessionLength(websafeConferenceKey, field, operator, value)` - Given
+  - `querySessionLength(websafeConferenceKey, operator, value)` - Given
     a Conference entity, return a list of session entities that are less than,
     more than, or equal to a defined duration (in minutes). For example, a user
     could look for sessions within a conference that are less than 120 minutes (
-    2 hours) or more than 60 minutes (1 hour). In these cases, `field` is
-    duration_minutes, `operator` could be LT,LTEQ,GT,GTEQ, or EQ, and `value` is
-    the session length in minutes
-  - `querySessionTime(websafeConferenceKey, sessionType, field, operator,value)` - To
+    2 hours) or more than 60 minutes (1 hour). In these cases,  `operator` could
+    be LT,LTEQ,GT,GTEQ, or EQ, and `value` is the session length in minutes.
+  - `querySessionTime(websafeConferenceKey, sessionType, operator,value)` - To
     handle a query for all non-workshop sessions before 7pm, we
     have to understand what makes this query troublesome. This query is
     essentially two inequality filters: first on `sessionType`, then on
@@ -101,13 +98,21 @@ App Engine application for the Udacity training course.
     equality filter, or in this solution, "a member of" filter (IN). Instead of
     defining what the user doesn't want, we could structure the query to find
     sessions that are anything but workshop. For example if there are types such
-    as workshop, lecture, seminar, the query would be `Session.sessionType.IN(['lecture','seminar'])` - 
+    as workshop, lecture, seminar, the query would be `Session.sessionType.IN(['lecture','seminar'])` -
     then anything but workshop will show up. Since the
     first filter is no longer inequality filter, the second filter could remain
     as is to filter out sessions before 7 pm. To use this query, all types of
-    sessions but workshop will be supplied to `sessionType`, with `field` equal
-    to startTime, `operator` could be anything the user wants, and `value` equal
-    to the hour user specified (military hour, e.g. 7pm = 19)
+    sessions but workshop will be supplied to `sessionType`, `operator` could be
+    anything the user wants, and `value` equal to the hour user specified
+    (military hour, e.g. 7pm = 19).
+
+    Another workaround is to handle the second search in python code. In the
+    actual implementation, a Datastore query is first executed to filter out
+    undesired start time. Afterward, the Datastore filter result is passed into
+    a list comprehension with if/else statement, where only sessions with
+    session type not equal to what the user specified will be passed into the
+    final result. In this case, user supplied undesired session type to
+    'sessionType', while 'operator' and 'value' arguments remained the same.
 
 ## Task 4: Add a Task
 - When a new session is added to a conference (via `createSession` endpoint), a

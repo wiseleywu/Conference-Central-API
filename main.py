@@ -7,8 +7,6 @@ HTTP controller handlers for memcache & task queue access
 
 """
 
-__author__ = 'wiseleywu@gmail.com (Wiseley Wu)'
-
 import webapp2
 
 from google.appengine.api import app_identity
@@ -19,6 +17,8 @@ from google.appengine.ext import ndb
 from conference import ConferenceApi
 from settings import MEMCACHE_SPEAKER_KEY
 from models import Conference, Session, Speaker
+
+__author__ = 'wiseleywu@gmail.com (Wiseley Wu)'
 
 
 class SetAnnouncementHandler(webapp2.RequestHandler):
