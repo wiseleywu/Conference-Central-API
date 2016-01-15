@@ -68,21 +68,21 @@ App Engine application for the Udacity training course.
 
 ## Task 2: Add Sessions to User Wishlist
 - To accommodate user wishlist, the `Profile` entity was modified to include a
-  new property - `sessionKeysToAttend`, a list of all the Sessions'
-  `websafeSessionKey` a user has put into his or her wishlist. There is no need to
+  new property - `sessionKeysToAttend`, a list of all the Sessions' keys
+  a user has put into his or her wishlist. There is no need to
   create wishlist as a brand new entity since it is simply a list of sessions
   the user wishes to attend, which is similar to a list of conferences the user
-  has registered to attend. A string list stored in the `Profile` entity allows
-  easy querying and retrieving of all the session keys and their corresponding
+  has registered to attend. A key list stored in the `Profile` entity allows
+  easy retrieving of all the session keys and their corresponding
   session entities
 - The following endpoints API have been defined to implement this new option:
-  - `addSessionToWishList(websafeSessionKey)` - Add the given `websafeSessionKey`
-    to the user's sessions wishlist within their `Profile` entity, provided the
-    user has already registered to attend the parent conference
-  - `deleteSessionInWishlist(websafeSessionKey)` - Remove the given
-    `websafeSessionKey` from the user's session wishlist
-  - `getSessionsInWishlist` - Query all the sessions across all the conferences
-    the user has added to their wishlist
+  - `addSessionToWishList(websafeSessionKey)` - Add the corresponding Session
+    key to the user's wishlist within their `Profile` entity, provided
+    the user has already registered to attend the parent conference
+  - `deleteSessionInWishlist(websafeSessionKey)` - Remove the corresponding
+    Session key from the user's wishlist
+  - `getSessionsInWishlist` - Retrieve all the sessions across all the
+    conferences the user has added to his or her wishlist
 
 ## Task 3: Work on indexes and queries
 - Several queries have been added that would be useful for this application
@@ -120,12 +120,13 @@ App Engine application for the Udacity training course.
     (military hour, e.g. 7pm = 19).
 
     Another workaround is to handle the second search in python code. In the
-    actual implementation, a Datastore query is first executed to filter out
-    undesired start time. Afterward, the Datastore filter result is passed into
-    a list comprehension with if/else statement, where only sessions with
-    session type not equal to what the user specified will be passed into the
-    final result. In this case, user supplied undesired session type to
-    `sessionType`, while `operator` and `value` arguments remained the same.
+    actual implementation of this query, a Datastore query is first executed to
+    filter out undesired start time. Afterward, the filtered Datastore result is
+    passed into a list comprehension with if/else statement, where only sessions
+    with session type not equal to what the user specified will be passed to
+    the final result. In this case, user supplied undesired session type to
+    `sessionType`, while `operator` and `value` arguments remained the same as
+    above.
 
 ## Task 4: Add a Task
 - When a new session is added to a conference (via `createSession` endpoint), a
