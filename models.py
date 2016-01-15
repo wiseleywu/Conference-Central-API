@@ -27,8 +27,8 @@ class Profile(ndb.Model):
     displayName = ndb.StringProperty()
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
-    conferenceKeysToAttend = ndb.StringProperty(repeated=True)
-    sessionKeysToAttend = ndb.StringProperty(repeated=True)
+    conferenceKeysToAttend = ndb.KeyProperty(repeated=True, kind='Conference')
+    sessionKeysToAttend = ndb.KeyProperty(repeated=True, kind='Session')
 
 
 class ProfileMiniForm(messages.Message):
@@ -170,7 +170,7 @@ class Speaker(ndb.Model):
     """Speaker -- Session Speaker Object"""
     displayName = ndb.StringProperty(required=True)
     mainEmail = ndb.StringProperty(required=True)
-    # sessionKeysToAttend = ndb.StringProperty(repeated=True)
+    # sessionKeysToAttend = ndb.KeyProperty(repeated=True, kind='Session')
 
 
 class SpeakerForm(messages.Message):

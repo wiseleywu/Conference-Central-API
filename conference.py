@@ -335,17 +335,20 @@ class ConferenceApi(remote.Service):
         # then filter out the conference user provided
         conferences = Conference.query(ancestor=prof.key).filter(
                                                     Conference.key != conf.key)
+
         # Create filterNode and perform search if all fields are provided
         if (request.field and request.operator and request.value):
             node = ndb.query.FilterNode(request.field,
                                         OPERATORS[request.operator],
                                         request.value)
             conferences = conferences.filter(node)
+
         # Raise error if user didn't provide all 3 fields,
         # otherwise return current query result without further filtering
         elif (request.field or request.operator or request.value):
             raise endpoints.BadRequestException(
                                 "You need to define field, operator, and value")
+
         return ConferenceForms(
                 items=[
                     self._copyConferenceToForm(conf,
@@ -361,10 +364,15 @@ class ConferenceApi(remote.Service):
         pf = ProfileForm()
         for field in pf.all_fields():
             if hasattr(prof, field.name):
-                # convert t-shirt string to Enum; just copy others
-                if field.name == 'teeShirtSize':
+                # convert key objects to websafekey, put it back in a list
+                if field.name.endswith('Attend'):
+                    key_list = [x.urlsafe() for x in getattr(prof, field.name)]
+                    setattr(pf, field.name, key_list)
+                # convert t-shirt string to Enum;
+                elif field.name == 'teeShirtSize':
                     setattr(pf, field.name,
                             getattr(TeeShirtSize, getattr(prof, field.name)))
+                # just copy others
                 else:
                     setattr(pf, field.name, getattr(prof, field.name))
         pf.check_initialized()
@@ -476,13 +484,11 @@ class ConferenceApi(remote.Service):
         # get user Profile
         prof = self._getProfileFromUser()
         # get conference object from Datastore
-        wsck = request.websafeConferenceKey
-        conf = self._getDataStoreObject(wsck)
-
+        conf = self._getDataStoreObject(request.websafeConferenceKey)
         # register
         if reg:
             # check if user already registered otherwise add
-            if wsck in prof.conferenceKeysToAttend:
+            if conf.key in prof.conferenceKeysToAttend:
                 raise ConflictException(
                     "You have already registered for this conference")
 
@@ -492,17 +498,17 @@ class ConferenceApi(remote.Service):
                     "There are no seats available.")
 
             # register user, take away one seat
-            prof.conferenceKeysToAttend.append(wsck)
+            prof.conferenceKeysToAttend.append(conf.key)
             conf.seatsAvailable -= 1
             retval = True
 
         # unregister
         else:
             # check if user already registered
-            if wsck in prof.conferenceKeysToAttend:
+            if conf.key in prof.conferenceKeysToAttend:
 
                 # unregister user, add back one seat
-                prof.conferenceKeysToAttend.remove(wsck)
+                prof.conferenceKeysToAttend.remove(conf.key)
                 conf.seatsAvailable += 1
                 retval = True
             else:
@@ -521,12 +527,8 @@ class ConferenceApi(remote.Service):
         """Get list of conferences that user has registered for."""
         # get user Profile
         prof = self._getProfileFromUser()
-
         # get multiple conferences with multiple keys at once
-        conf_keys = [
-            ndb.Key(urlsafe=wsck) for wsck in prof.conferenceKeysToAttend]
-        conferences = ndb.get_multi(conf_keys)
-
+        conferences = ndb.get_multi(prof.conferenceKeysToAttend)
         # get organizers
         organisers = [
             ndb.Key(Profile, conf.organizerUserId) for conf in conferences]
@@ -703,22 +705,26 @@ class ConferenceApi(remote.Service):
         session = self._getDataStoreObject(wssk)
 
         # check whether user has registered for conference where session belongs
-        wsck = session.key.parent().urlsafe()
-        if wsck not in prof.conferenceKeysToAttend:
+        c_key = session.key.parent()
+        if c_key not in prof.conferenceKeysToAttend:
             raise ConflictException(
                 "You have yet to register for the conference where this "
                 "session will take place")
+
+        # put session in wishlist
         if reg:
-            if wssk in prof.sessionKeysToAttend:
+            if session.key in prof.sessionKeysToAttend:
                 raise ConflictException(
                     "You have already placed this session in your wishlist")
-            prof.sessionKeysToAttend.append(wssk)
+            prof.sessionKeysToAttend.append(session.key)
             retval = True
+
+        # remove session from wishlist
         else:
-            if wssk not in prof.sessionKeysToAttend:
+            if session.key not in prof.sessionKeysToAttend:
                 raise ConflictException(
-                    "You have already removed this session from your wishlist")
-            prof.sessionKeysToAttend.remove(wssk)
+                    "This session was not in your wishlist. No action taken.")
+            prof.sessionKeysToAttend.remove(session.key)
             retval = True
         prof.put()
         return BooleanMessage(data=retval)
@@ -728,8 +734,7 @@ class ConferenceApi(remote.Service):
         # User authentication
         prof = self._getProfileFromUser()
         # Retrieve all sessions with all session Keys at once
-        s_keys = [(ndb.Key(urlsafe=wssk)) for wssk in prof.sessionKeysToAttend]
-        sessions = ndb.get_multi(s_keys)
+        sessions = ndb.get_multi(prof.sessionKeysToAttend)
         return SessionForms(
             items=[self._copySessionToForm(session) for session in sessions]
         )
