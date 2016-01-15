@@ -952,7 +952,7 @@ class ConferenceApi(remote.Service):
         return self._createSpeakerObject(request)
 
     @endpoints.method(
-            SPEAKER_GET_REQUEST, SpeakerForm, path='speakers/{speakerId}',
+            SPEAKER_GET_REQUEST, SpeakerForm, path='speaker/{speakerId}',
             http_method='GET', name='getSpeaker')
     def getSpeaker(self, request):
         """Get Speaker Object given the speakerId"""

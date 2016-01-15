@@ -1,3 +1,4 @@
+## Conference Central API
 App Engine application for the Udacity training course.
 
 ## Products
@@ -8,6 +9,18 @@ App Engine application for the Udacity training course.
 
 ## APIs
 - [Google Cloud Endpoints][3]
+
+## Instructions
+- [Download][4] and install Google App Engine SDK for Python
+- Clone this repository
+- Create a new project from [Google Developers Console][5]. An application ID will be assigned to your project
+- Go to API Manager -> Credentials in the Developers Console to create an OAuth client ID for web application use (or others if you plan to test the APIs on Android/iOS platform)
+- Update the value of `application` in [app.yaml](app.yaml) to the application ID you have registered in the Developers Console and would like to use to host your instance of this sample
+- Update the values at the top of [settings.py](settings.py) to reflect the respective client IDs you have registered in the Developers Console
+- Update the value of `CLIENT ID` at Line 89 in [static/js/app.js](static/js/app.js) to the Web client ID
+- Deploy the app on to local web server by invoking the following command in console: `$ dev_appserver.py ConferenceCentral_Complete/`. Visit the local server address at [localhost:8080][6] (by default)
+- In order to deploy the server successfully, you will have to tell the browser to allow active content via HTTP (on Chrome, click the shield in the URL bar and click "Load unsafe script")
+- Upload the app to Google App Engine by invoking the following command in console: `$ appcfg.py -A YOUR_PROJECT_ID update ConferenceCentral_Complete/`. Visit the deployed application at https://YOUR_PROJECT_ID.appspot.com/
 
 ## Task 1: Add Sessions to a Conference
 - `Session` entity is setup to have the following properties:
@@ -129,3 +142,6 @@ App Engine application for the Udacity training course.
 [1]: https://developers.google.com/appengine
 [2]: http://python.org
 [3]: https://developers.google.com/appengine/docs/python/endpoints/
+[4]: https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python
+[5]: https://console.developers.google.com/
+[6]: http://localhost:8080/
