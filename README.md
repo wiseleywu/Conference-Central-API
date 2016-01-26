@@ -1,5 +1,7 @@
-## Conference Central API
-App Engine application for the Udacity training course.
+# Conference Central API
+A Cloud-based API server built using Google App Engine to support a web-based conference organization application. The current API supports Google user authentication, user/speaker profiles, conference/session information, sessions wishlist for users, and various manners to query the data. Additional functionalities include task queues to query and store a particular popular speaker in memcache, send user confirmation e-mail upon creating a new conference, and Cron job to check conferences that are almost full periodically.
+
+This project is based on code provided by Udacity [here](https://github.com/udacity/ud858), where the frontend part has been completed already. Most of the changes detailed here are modification to the backend part to support additional API and functionalities.
 
 ## Products
 - [App Engine][1]
@@ -22,7 +24,9 @@ App Engine application for the Udacity training course.
 - In order to deploy the server successfully, you will have to tell the browser to allow active content via HTTP (on Chrome, click the shield in the URL bar and click "Load unsafe script")
 - Upload the app to Google App Engine by invoking the following command in console: `$ appcfg.py -A YOUR_PROJECT_ID update ConferenceCentral_Complete/`. Visit the deployed application at https://YOUR_PROJECT_ID.appspot.com/
 
-## Task 1: Add Sessions to a Conference
+## Design Explanation
+
+### Task 1: Add Sessions to a Conference
 - `Session` entity is setup to have the following properties:
   - `name` - Name of Session (StringProperty)
   - `sessionType` - Type of Session, such as workshop, lecture, etc (StringProperty)
@@ -66,7 +70,7 @@ App Engine application for the Udacity training course.
   - `getSessionsBySpeaker(speakerId)` - Given a `speakerId`, return all sessions
     given by this particular speaker, across all conferences
 
-## Task 2: Add Sessions to User Wishlist
+### Task 2: Add Sessions to User Wishlist
 - To accommodate user wishlist, the `Profile` entity was modified to include a
   new property - `sessionKeysToAttend`, a list of all the Sessions' keys
   a user has put into his or her wishlist. There is no need to
@@ -84,7 +88,7 @@ App Engine application for the Udacity training course.
   - `getSessionsInWishlist` - Retrieve all the sessions across all the
     conferences the user has added to his or her wishlist
 
-## Task 3: Work on indexes and queries
+### Task 3: Work on indexes and queries
 - Several queries have been added that would be useful for this application
   - `querySimilarConferences(websafeConferenceKey, field, operator, value)` -
     Given a Conference entity, return a list of Conference entities that are
@@ -128,7 +132,7 @@ App Engine application for the Udacity training course.
     `sessionType`, while `operator` and `value` arguments remained the same as
     above.
 
-## Task 4: Add a Task
+### Task 4: Add a Task
 - When a new session is added to a conference (via `createSession` endpoint), a
   task is added to the default queue with `websafeConferenceKey` and `speakerId`
   passed to `checkedFeaturedSpeaker` (located in main.py) as parameters. There,
